@@ -20,12 +20,27 @@
         loaded;
 
     this.one("unveil", function() {
+      var self = this;
       var source = this.getAttribute(attrib);
+      var placeholderImage = this.getAttribute("src");
+      var img = new Image();
       source = source || this.getAttribute("data-src");
-      if (source) {
-        this.setAttribute("src", source);
-        if (typeof callback === "function") callback.call(this);
-      }
+      img.src = source;
+      img.onload = function() {
+        if(this.width < 2 || this.height < 2) {
+          //in case server sends back a junk 1x1 image. Sometimes, done by Google Servers
+          self.setAttribute('src', placeholderImage);
+
+        } else {
+          self.setAttribute('src', source);
+          if (typeof callback === "function") callback.call(self);
+        }
+      };
+
+      img.onerror = function() {
+        self.setAttribute('src', placeholderImage);
+      };
+
     });
 
     function unveil() {
